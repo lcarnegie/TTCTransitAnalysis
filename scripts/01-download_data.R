@@ -7,7 +7,6 @@
 
 #### Workspace setup ####
 library(opendatatoronto)
-library(readxl)
 library(tidyverse)
 
 

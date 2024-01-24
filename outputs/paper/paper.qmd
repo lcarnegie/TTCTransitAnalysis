@@ -36,22 +36,23 @@ This paper aims to find relationships and patterns of public transit delay time 
 
 # Data {#sec-data}
 
-To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwaydata], and streetcar [@streetcardata] delay incidents for the year 2023 was downloaded using the OpenDataToronto R package [@odt]. Then, the data was cleaned using R [@citeR], tidyverse [@tidyverse] and it's associated packages. After combining the datasets together, variables common between datasets and relevant to the analysis were selected. In the case of this analysis, the variables included were date (year, month, day), day of the week, Location of Delay Incident, Cause of Delay, the time delay (in minutes), Vehicle (bus, subway, streetcar), as well as the route/line (simplified to 'line') the vehicle was on when the incident happened. (Perhaps add seasonal analysis??) 
+To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwaydata], and streetcar [@streetcardata] delay incidents for the year 2023 was downloaded using the OpenDataToronto R package [@odt]. Then, the data was cleaned using R [@citeR], tidyverse [@tidyverse] and it's associated packages. After combining the datasets together, variables common between datasets and relevant to the analysis were selected. In the case of this analysis, the variables included were date (year, month, day), day of the week, Location of Delay Incident, Cause of Delay, the time delay (in minutes), Vehicle (bus, subway, streetcar), as well as the route/line (simplified to 'line') the vehicle was on when the incident happened. (Perhaps add seasonal analysis??)
+
+## General Delay Analysis {#subsec1-data}
 
 ```{r}
 #| message: false
 #| echo: false
 #| label: tbl-cleaned_data
 #| tbl-cap: Sample of Cleaned Delay Data
+#| fig-align: center
 
-cleaned_transit_data <- read_csv(here::here("/outputs/data/cleaned_dataset.csv"))
+cleaned_transit_data <- read_csv(here::here("outputs/data/cleaned_dataset.csv"))
 
-head (cleaned_homicide_data, 5) 
+sample_table <- head(cleaned_transit_data, 5) 
+
+knitr::kable(sample_table)
 ```
-
-## General Delay Analysis {#subsec1-data}
-
-
 
 # Discussion {#sec-discussion}
 
