@@ -4,7 +4,7 @@
 
 This paper analyzes relationships between average public transit delay time in Toronto, across various genres of transportation and relating variables. 
 
-### LLM Usage Disclosure: Aspects of my R code and paper were written and edited with the assistance of Large Language Models, in particular Claude-2 and GPT-3.5 (ChatGPT). The chat history with both models are available in inputs/llms/usage.txt
+#### LLM Usage Disclosure: Aspects of my R code and paper were written and edited with the assistance of Large Language Models, in particular Claude-2 and GPT-3.5 (ChatGPT). The chat history with both models are available in inputs/llms/usage.txt
 
 ## File Structure
 
