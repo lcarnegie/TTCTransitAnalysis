@@ -5,13 +5,9 @@
 
 #Import relevant libraries
 install.packages("tidyverse")
-install.packages('janitor')
-install.packages("lubridate")
 library(tidyverse)
 library(ggplot2)
-library(janitor)
-library(lubridate)
-library(wakefield)
+
 
 #### Data expectations ####
 # Columns: year, month, day, weekday, hour, minute, line, vehicle, incident, delay
@@ -43,12 +39,15 @@ simulated_data <-
     incident = sample(c("Mechanical", "Operations", "General Delay", "Emergency"), num_obs, replace = TRUE),
     delay = sample(0:47, num_obs, replace = TRUE),
   )
+## SIMULATED PLOTS ##
 
 #Bar chart of Reasons for delay vs. # of incidents 
 simulated_data |>
   ggplot(mapping = aes(x = incident)) +
   geom_bar() + 
+  labs(title="Delay v. # Incidents", x="Incident Type", y="Count") +
   theme_minimal()
+
 
 #Line chart of how avg. delay time changes over the months
 
@@ -66,6 +65,33 @@ avg_delay |>
   labs(title="Monthly Change in Delays by Vehicle", x="Month", y="Monthly Avg. Delay") + 
   scale_color_manual(values=c("blue","green", "red"), labels=c("Bus","Streetcar", "Subway")) +
   theme_minimal()
+
+#Bar graph of mode of transport with most delays 
+
+avg_time_delayed_vehicle <- simulated_data |> group_by(vehicle) |> summarise(avg_delay = mean(delay, na.rm = TRUE), .groups = "drop")
+
+
+avg_time_delayed_vehicle |>
+  ggplot(mapping = aes(x = vehicle, y = avg_delay)) +
+  geom_col() + 
+  labs(title="Average Delay by Vehicle", x="Vehicle", y="Average Delay (mins)") +
+  theme_minimal()
+
+## TESTS ##  
+
+#Check that incident type is of class 'character'
+simulated_data$incident |> class() == 'character'
+
+#Check that day of incident lies between 1 and 31
+simulated_data$day |> min() == 1
+simulated_data$day |> max() == 31
+
+#Check that vehicle type is of class 'character' 
+simulated_data$vehicle |> class() == 'character'
+
+#Check year is ONLY 2023 
+simulated_data$year == 2023
+
 
 
   
