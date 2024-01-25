@@ -27,6 +27,7 @@ library(kableExtra)
 library(knitr)
 ```
 
+
 # Introduction
 
 A key area of improvement in Canadian sustainability is in increasing the use of public transportation in big cities like Toronto. This makes sense, since cars account for about 80% of transportation emissions [@diaetal]. A major drawback preventing the widespread use of public transportation is the existence of delays within transit systems. These delays push citizens toward using less sustainable alternatives like private cars, leading to congestion on highways and consequent increased emissions. The lack of timely transit services have a demonstrated impact on traffic. One study by Anderson et al. estimated a whopping 47 percent increase in highway delay when transit service ceased completely in a big city such as Los Angeles [@anderson]. Learning from this example, it is imperative that policy makers understand and fix these delays to improve sustainability in Toronto.
@@ -36,6 +37,7 @@ The Toronto Transit Commission (TTC) has been Toronto's transit system since 192
 This paper aims to find patterns of public transit delay time across various genres of transportation. First, the data source and analysis employed are covered in Section Two. Section Three then critically examines the data, delving deeper to arrive at various conclusions, as well as discussing implications and proposing new areas of exploration for this data.
 
 # Data {#sec-data}
+
 
 ```{r data import and sample table }
 #| message: false
@@ -65,9 +67,11 @@ cleaned_transit_data
 kable(sample_table) |> kable_styling(latex_options = c("striped", "scale_down"))
 ```
 
+
 To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwaydata], and streetcar [@streetcardata] delay incidents for the year 2023 was downloaded using the OpenDataToronto R package [@odt] from the Toronto Open Data Catalogue. The data was then cleaned using R [@citeR], tidyverse [@tidyverse] and it's associated packages. After combining the datasets together, variables common between datasets and relevant to the analysis were selected, leading to a dataset with 93,569 observations. In the case of this analysis, the variables included were date (year, month, day), day of the week, Location of Delay Incident, Cause of Delay, the time delay (in minutes), Vehicle (bus, subway, streetcar), as well as the route/line (simplified to 'line') the vehicle was on when the incident happened.
 
 # Incident Type {#subsec1-data}
+
 ```{r ggplot Common Delay Reasons}
 #| message: false
 #| echo: false
@@ -92,10 +96,12 @@ cleaned_transit_data |>
         panel.grid.minor=element_blank())
 
 ```
+
 Subways didn't have any reason for delay, yet have the most incidence of delay. 
 
 
 # Line/Route {#subsec2-data}
+
 ```{r ggplot routes with avg. delay}
 #| message: false
 #| echo: false
@@ -111,7 +117,9 @@ cleaned_transit_data
 ```
 
 
+
 # Vehicle Type {#subsec3-data}
+
 ```{r ggplot transport with longest avg. delays}
 #| message: false
 #| echo: false
@@ -128,6 +136,7 @@ avg_time_delayed_vehicle |>
   labs(title="Average Delay by Vehicle", x="Vehicle Type", y="Average Delay (mins)") +
   theme_minimal()
 ```
+
 ```{r ggplot transport with most incidence of delays }
 #| message: false
 #| echo: false
@@ -144,7 +153,9 @@ num_incidents_vehicle |>
   theme_minimal()
 
 ```
+
 # Day of Week {#subsec4-data}
+
 ```{r ggplot Day of Week with Delay incidence}
 #| message: false
 #| echo: false
@@ -173,6 +184,7 @@ num_incidents_vehicle |>
 
 
 ```
+
 ```{r ggplot Day of Week with Avg. Delays}
 #| message: false
 #| echo: false
@@ -196,7 +208,9 @@ avg_time_delayed_vehicle |>
   theme_minimal()
 ```
 
+
 # Time of Year {#subsec5-data}
+
 ```{r ggplot avg delay change monthly}
 #| message: false
 #| echo: false
@@ -237,6 +251,7 @@ avg_delay |>
 
 
 
+
 # Discussion {#sec-discussion}
 
 # Results {#subsec1-discussion}
@@ -249,7 +264,9 @@ avg_delay |>
 
 # References
 
+
 ---
 nocite: |
   @citeR, @ggplot, @odt, @janitor, @lubridate, @tidyverse, @dplyr, @ggplot, @testthat, @MartinWittmanLi, @diaetal, @anderson,
 ---
+

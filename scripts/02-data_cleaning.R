@@ -14,6 +14,7 @@ library(lubridate)
 
 
 #### Clean data ####
+
 raw_data_bus <- read_csv("inputs/data/bus_data.csv")
 raw_data_streetcar <- read_csv("inputs/data/streetcar_data.csv")
 raw_data_subway <- read_csv("inputs/data/subway_data.csv")
