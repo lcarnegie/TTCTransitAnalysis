@@ -186,11 +186,11 @@
 
 \title{Exploring TTC Delays\thanks{Code and data are available at:
 https://github.com/lcarnegie/OpenDataToronto. Thank you to Nescafé
-coffee, Rajan Maghera, Egg McMuffins, Hannah Yu, and Sehar Bajwa for
-your love and support - could not have done it without you. No thanks go
-to Rohan in particular for not pointing out all the R he wanted us to
-learn that was in his textbook\ldots{} sigh. I will try the appendix
-cocktails someday, though. :)}}
+coffee, Rajan Maghera, Hannah Yu, and Sehar Bajwa for your love and
+support - could not have done it without you. No thanks go to Rohan in
+particular for not pointing out all the R he wanted us to learn that was
+in his textbook\ldots{} sigh. I will try the appendix cocktails someday,
+though. :)}}
 \usepackage{etoolbox}
 \makeatletter
 \providecommand{\subtitle}[1]{% add subtitle to \maketitle
@@ -199,7 +199,7 @@ cocktails someday, though. :)}}
 \makeatother
 \subtitle{A Multimodal Analysis}
 \author{Luca Carnegie}
-\date{January 24, 2024}
+\date{January 25, 2024}
 
 \begin{document}
 \maketitle
@@ -211,33 +211,35 @@ First sentence. Second sentence. Third sentence. Fourth sentence.
 
 A key area of improvement in Canadian sustainability is in increasing
 the use of public transportation in big cities like Toronto. This makes
-sense since cars account for about 80\% of transportation emissions (Dia
-et al. 2019). However, a major drawback preventing the widespread use of
-public transportation is the existence of delays within the transit
-system. These delays incentivize citizens toward using less sustainable
-alternatives like private cars, leading to congestion on highways and
-consequent increased emissions. The lack of timely transit services have
-a demonstrated impact on traffic. One study by Anderson et al.~estimated
-a whopping 47 percent increase in highway delay when transit service
-ceased completely in a big city such as Los Angeles (Anderson 2014). It
-is clear to see, then, that it is imperative that policy makers
-understand and fix these delays to improve sustainability.
+sense, since cars account for about 80\% of transportation emissions
+(Dia et al. 2019). A major drawback preventing the widespread use of
+public transportation is the existence of delays within transit systems.
+These delays push citizens toward using less sustainable alternatives
+like private cars, leading to congestion on highways and consequent
+increased emissions. The lack of timely transit services have a
+demonstrated impact on traffic. One study by Anderson et al.~estimated a
+whopping 47 percent increase in highway delay when transit service
+ceased completely in a big city such as Los Angeles (Anderson 2014).
+Learning from this example, it is imperative that policy makers
+understand and fix these delays to improve sustainability in Toronto.
 
-The ``TTC'', or Toronto Transit Commission, has been Toronto's transit
-system since 1921, serving the city population with subways, streetcars,
-buses, along with smaller offerings. The openly available data
-surrounding the delays of these various modes of transport offers
-opportunity to investigate the root causes of the longer-lasting delays.
-Understanding what caused a delay, when it was caused and where it was
-caused could give the TTC more insight into how to deliver their
-services to the public more efficiently and effectively, setting an
-examples of what an effective transit agency could look like.
+The Toronto Transit Commission (TTC) has been Toronto's transit system
+since 1921, serving the city population with a variety of transportation
+methods, particularly subways, streetcars, and buses. The openly
+available data surrounding the delays of these various modes of
+transport offers the opportunity to investigate the root causes of these
+delays and prompt discussion as how to rectify them. Understanding the
+common causes of a delay, when a delay is typically caused and where it
+was caused gives the TTC more insight into how to deliver their services
+to the public more efficiently and effectively, setting an improved
+example of what an effective transit agency looks like.
 
-This paper aims to find relationships and patterns of public transit
-delay time across various genres of transportation. First, the data
-source and analysis employed are covered. Section Three then critically
+This paper aims to find patterns of public transit delay time across
+various genres of transportation. First, the data source and analysis
+employed are covered in Section Two. Section Three then critically
 examines the data, delving deeper to arrive at various conclusions, as
-well as discussing implications and proposing new areas of exploration.
+well as discussing implications and proposing new areas of exploration
+for this data.
 
 \section{Data}\label{sec-data}
 
@@ -247,14 +249,12 @@ delay incidents for the year 2023 was downloaded using the
 OpenDataToronto R package (Gelfand 2022). Then, the data was cleaned
 using R (R Core Team 2022), tidyverse (Wickham et al. 2019) and it's
 associated packages. After combining the datasets together, variables
-common between datasets and relevant to the analysis were selected. In
-the case of this analysis, the variables included were date (year,
-month, day), day of the week, Location of Delay Incident, Cause of
-Delay, the time delay (in minutes), Vehicle (bus, subway, streetcar), as
-well as the route/line (simplified to `line') the vehicle was on when
-the incident happened. (Perhaps add seasonal analysis??)
-
-\subsection{General Delay Analysis}\label{subsec1-data}
+common between datasets and relevant to the analysis were selected,
+leading to a dataset with 93,569 observations. In the case of this
+analysis, the variables included were date (year, month, day), day of
+the week, Location of Delay Incident, Cause of Delay, the time delay (in
+minutes), Vehicle (bus, subway, streetcar), as well as the route/line
+(simplified to `line') the vehicle was on when the incident happened.
 
 \begin{table}
 
@@ -262,25 +262,47 @@ the incident happened. (Perhaps add seasonal analysis??)
 
 \centering{
 
-\begin{tabular}{l|l|l|l|r|l|l|r}
-\hline
-Date & Time & Day & vehicle & Line & Location & Incident & Min Delay\\
-\hline
-2023-01-01 & 02:30:00 & Sunday & Bus & 91 & WOODBINE AND MORTIMER & Diversion & 81\\
-\hline
-2023-01-01 & 02:34:00 & Sunday & Bus & 69 & WARDEN STATION & Security & 22\\
-\hline
-2023-01-01 & 03:06:00 & Sunday & Bus & 35 & JANE STATION & Cleaning & 30\\
-\hline
-2023-01-01 & 03:14:00 & Sunday & Bus & 900 & KIPLING STATION & Security & 17\\
-\hline
-2023-01-01 & 03:43:00 & Sunday & Bus & 85 & MEADOWALE LOOP & Security & 1\\
-\hline
-\end{tabular}
-
 }
 
 \end{table}%
+
+\begin{table}
+\caption{Sample of Cleaned Delay Data}\tabularnewline
+
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}{l|l|l|l|r|l|l|r}
+\hline
+Date & Time & Day & Vehicle & Route/Line & Location & Reason & Delay (Minutes)\\
+\hline
+\cellcolor{gray!6}{2023-01-01} & \cellcolor{gray!6}{02:30:00} & \cellcolor{gray!6}{Sunday} & \cellcolor{gray!6}{Bus} & \cellcolor{gray!6}{91} & \cellcolor{gray!6}{WOODBINE AND MORTIMER} & \cellcolor{gray!6}{Diversion} & \cellcolor{gray!6}{81}\\
+\hline
+2023-01-01 & 02:34:00 & Sunday & Bus & 69 & WARDEN STATION & Security & 22\\
+\hline
+\cellcolor{gray!6}{2023-01-01} & \cellcolor{gray!6}{03:06:00} & \cellcolor{gray!6}{Sunday} & \cellcolor{gray!6}{Bus} & \cellcolor{gray!6}{35} & \cellcolor{gray!6}{JANE STATION} & \cellcolor{gray!6}{Cleaning} & \cellcolor{gray!6}{30}\\
+\hline
+2023-01-01 & 03:14:00 & Sunday & Bus & 900 & KIPLING STATION & Security & 17\\
+\hline
+\cellcolor{gray!6}{2023-01-01} & \cellcolor{gray!6}{03:43:00} & \cellcolor{gray!6}{Sunday} & \cellcolor{gray!6}{Bus} & \cellcolor{gray!6}{85} & \cellcolor{gray!6}{MEADOWALE LOOP} & \cellcolor{gray!6}{Security} & \cellcolor{gray!6}{1}\\
+\hline
+\end{tabular}}
+\end{table}
+
+\includegraphics{paper_files/figure-pdf/common-reasons-delay-1.pdf}
+
+\begin{verbatim}
+Warning: Unknown or uninitialised column: `month`.
+\end{verbatim}
+
+\includegraphics{paper_files/figure-pdf/monthly-delay-times-1.pdf}
+
+\includegraphics{paper_files/figure-pdf/mode-longest-delays-1.pdf}
+
+\includegraphics{paper_files/figure-pdf/most-incidents-vehicle-1.pdf}
+
+\includegraphics{paper_files/figure-pdf/transport-delay-time-1.pdf}
+
+\includegraphics{paper_files/figure-pdf/transport-delay-number-1.pdf}
 
 \section{Discussion}\label{sec-discussion}
 

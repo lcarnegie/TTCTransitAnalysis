@@ -2,7 +2,7 @@
 title: "Exploring TTC Delays"
 subtitle: "A Multimodal Analysis"
 author: Luca Carnegie
-thanks: "Code and data are available at: https://github.com/lcarnegie/OpenDataToronto. Thank you to Nescafé coffee, Rajan Maghera, Egg McMuffins, Hannah Yu, and Sehar Bajwa for your love and support - could not have done it without you. No thanks go to Rohan in particular for not pointing out all the R he wanted us to learn that was in his textbook... sigh. I will try the appendix cocktails someday, though. :)"
+thanks: "Code and data are available at: https://github.com/lcarnegie/OpenDataToronto. Thank you to Nescafé coffee, Rajan Maghera, Hannah Yu, and Sehar Bajwa for your love and support - could not have done it without you. No thanks go to Rohan in particular for not pointing out all the R he wanted us to learn that was in his textbook... sigh. I will try the appendix cocktails someday, though. :)"
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
@@ -24,21 +24,20 @@ library(tidyr)
 library(data.table)
 library(dplyr)
 library(kableExtra)
+library(knitr)
 ```
 
 # Introduction
 
-A key area of improvement in Canadian sustainability is in increasing the use of public transportation in big cities like Toronto. This makes sense since cars account for about 80% of transportation emissions [@diaetal]. However, a major drawback preventing the widespread use of public transportation is the existence of delays within the transit system. These delays incentivize citizens toward using less sustainable alternatives like private cars, leading to congestion on highways and consequent increased emissions. The lack of timely transit services have a demonstrated impact on traffic. One study by Anderson et al. estimated a whopping 47 percent increase in highway delay when transit service ceased completely in a big city such as Los Angeles [@anderson]. It is clear to see, then, that it is imperative that policy makers understand and fix these delays to improve sustainability.
+A key area of improvement in Canadian sustainability is in increasing the use of public transportation in big cities like Toronto. This makes sense, since cars account for about 80% of transportation emissions [@diaetal]. A major drawback preventing the widespread use of public transportation is the existence of delays within transit systems. These delays push citizens toward using less sustainable alternatives like private cars, leading to congestion on highways and consequent increased emissions. The lack of timely transit services have a demonstrated impact on traffic. One study by Anderson et al. estimated a whopping 47 percent increase in highway delay when transit service ceased completely in a big city such as Los Angeles [@anderson]. Learning from this example, it is imperative that policy makers understand and fix these delays to improve sustainability in Toronto.
 
-The "TTC", or Toronto Transit Commission, has been Toronto's transit system since 1921, serving the city population with subways, streetcars, buses, along with smaller offerings. The openly available data surrounding the delays of these various modes of transport offers opportunity to investigate the root causes of the longer-lasting delays. Understanding what caused a delay, when it was caused and where it was caused could give the TTC more insight into how to deliver their services to the public more efficiently and effectively, setting an examples of what an effective transit agency could look like.
+The Toronto Transit Commission (TTC) has been Toronto's transit system since 1921, serving the city population with a variety of transportation methods, particularly subways, streetcars, and buses. The openly available data surrounding the delays of these various modes of transport offers the opportunity to investigate the root causes of these delays and prompt discussion as how to rectify them. Understanding the common causes of a delay, when a delay is typically caused and where it was caused gives the TTC more insight into how to deliver their services to the public more efficiently and effectively, setting an improved example of what an effective transit agency looks like.
 
-This paper aims to find relationships and patterns of public transit delay time across various genres of transportation. First, the data source and analysis employed are covered. Section Three then critically examines the data, delving deeper to arrive at various conclusions, as well as discussing implications and proposing new areas of exploration.
+This paper aims to find patterns of public transit delay time across various genres of transportation. First, the data source and analysis employed are covered in Section Two. Section Three then critically examines the data, delving deeper to arrive at various conclusions, as well as discussing implications and proposing new areas of exploration for this data.
 
 # Data {#sec-data}
 
-To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwaydata], and streetcar [@streetcardata] delay incidents for the year 2023 was downloaded using the OpenDataToronto R package [@odt]. Then, the data was cleaned using R [@citeR], tidyverse [@tidyverse] and it's associated packages. After combining the datasets together, variables common between datasets and relevant to the analysis were selected. In the case of this analysis, the variables included were date (year, month, day), day of the week, Location of Delay Incident, Cause of Delay, the time delay (in minutes), Vehicle (bus, subway, streetcar), as well as the route/line (simplified to 'line') the vehicle was on when the incident happened. (Perhaps add seasonal analysis??)
-
-## General Delay Analysis {#subsec1-data}
+To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwaydata], and streetcar [@streetcardata] delay incidents for the year 2023 was downloaded using the OpenDataToronto R package [@odt]. Then, the data was cleaned using R [@citeR], tidyverse [@tidyverse] and it's associated packages. After combining the datasets together, variables common between datasets and relevant to the analysis were selected, leading to a dataset with 93,569 observations. In the case of this analysis, the variables included were date (year, month, day), day of the week, Location of Delay Incident, Cause of Delay, the time delay (in minutes), Vehicle (bus, subway, streetcar), as well as the route/line (simplified to 'line') the vehicle was on when the incident happened.
 
 ```{r}
 #| message: false
@@ -49,9 +48,164 @@ To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwa
 
 cleaned_transit_data <- read_csv(here::here("outputs/data/cleaned_dataset.csv"))
 
-sample_table <- head(cleaned_transit_data, 5) 
+```
 
-knitr::kable(sample_table)
+```{r}
+#| message: false
+#| echo: false
+#| label: summary_stats_table
+#| tbl-cap: Sample of Cleaned Delay Data
+#| fig-align: center
+
+cleaned_transit_data <- read_csv(here::here("outputs/data/cleaned_dataset.csv"))
+
+
+sample_table <- cleaned_transit_data |>
+  rename(Vehicle = vehicle) |>
+  rename(`Delay (Minutes)` = `Min Delay`) |>
+  rename(Reason = Incident) |>
+  rename(`Route/Line` = Line) |>
+  arrange(Date)
+
+sample_table <- head(sample_table, 5)
+
+#Scaling taken from: 
+#https://stackoverflow.com/questions/56254631/table-way-too-wide-to-fit-in-markdown-generated-pdf
+kable(sample_table) |> kable_styling(latex_options = c("striped", "scale_down"))
+```
+
+```{r}
+#| message: false
+#| echo: false
+#| label: common-reasons-delay
+#| tbl-cap: Most Common Reasons for Delay on TTC
+
+#Bar chart of Reasons for delay vs. # of incidents 
+
+cleaned_transit_data <- read_csv(here::here("outputs/data/cleaned_dataset.csv"))
+
+cleaned_transit_data |>
+  count(Incident) |>
+  ggplot(aes(x = n, y = reorder(Incident, n))) +
+  geom_bar(stat="identity", fill="grey50") +
+  labs(title="Most Common Reasons for Delay", x="Count", y="Incident Type") +
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5),
+        panel.background = element_blank(),
+        axis.line.y=element_line(color="black"),
+        axis.ticks.y=element_blank(),
+        panel.grid.major.x=element_line(color="grey80"),
+        panel.grid.minor=element_blank())
+
+```
+
+```{r}
+#| message: false
+#| echo: false
+#| label: monthly-delay-times
+#| tbl-cap: Average Monthy Delay Times
+#Line chart of how avg. delay time changes over the months
+
+month_dataset <- cleaned_transit_data |> mutate(month(Date)) |> rename(cleaned_transit_data$month, `month` = `month(Date)`)
+
+# #Calculate avg. delays 
+avg_delay <- month_dataset |> group_by(month, vehicle) |> summarise(`Min Delay` = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
+
+
+# #convert month to factor (categorical data)
+avg_delay$month <- factor(avg_delay$month, levels = 1:12, labels = month.abb[1:12])
+
+# #plot the graph
+avg_delay |>
+  ggplot(aes(x=month, y=`Min Delay`, color=vehicle, group=vehicle)) +
+  geom_line() +
+  labs(title="Average Monthly Delays by Vehicle", x="Month", y="Monthly Avg. Delay") +
+  scale_color_manual(values=c("blue","green", "red"), labels=c("Bus","Streetcar", "Subway")) +
+  theme_minimal()
+```
+
+```{r}
+#| message: false
+#| echo: false
+#| label: mode-longest-delays
+#| tbl-cap: Most Common Reasons for Delay on TTC
+#Bar graph of mode of transport with longest delays 
+
+avg_time_delayed_vehicle <- cleaned_transit_data |> group_by(vehicle) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
+
+
+avg_time_delayed_vehicle |>
+  ggplot(mapping = aes(x = vehicle, y = avg_delay)) +
+  geom_col() + 
+  labs(title="Average Delay by Vehicle", x="Vehicle Type", y="Average Delay (mins)") +
+  theme_minimal()
+```
+
+```{r}
+#| message: false
+#| echo: false
+#| label: most-incidents-vehicle
+#| tbl-cap: Most Incidents by Vehicle
+#Bar graph of mode of transport with most number of delays 
+
+num_incidents_vehicle <- cleaned_transit_data |> group_by(vehicle) |> summarise(num_incidents = n(), .groups = "drop")
+
+num_incidents_vehicle |>
+  ggplot(mapping = aes(x = vehicle, y = num_incidents)) +
+  geom_col() + 
+  labs(title="Number of Incidents by Vehicle", x="Vehicle Type", y="Number of Incidents") +
+  theme_minimal()
+
+```
+
+```{r}
+#| message: false
+#| echo: false
+#| label: transport-delay-time
+#| tbl-cap: Most Common Reasons for Delay on TTC
+#Bar graph of mode of transport with most number of delays
+
+# Inspired by: https://stackoverflow.com/questions/34280140/order-bar-graph-in-order-in-this-case-as-per-days-of-week 
+
+clean_transit_data <- cleaned_transit_data
+
+# Define the order of days
+days_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+
+# Convert 'Day' column to a factor with specific levels
+clean_transit_data$Day <- factor(clean_transit_data$Day, levels = days_order)
+
+# Now create the plot
+num_incidents_vehicle <- clean_transit_data |> arrange(Day) |> group_by(Day) |> summarise(num_incidents = n(), .groups = "drop")
+
+num_incidents_vehicle |>
+  ggplot(mapping = aes(x = Day, y = num_incidents)) +
+  geom_col() +
+  labs(title="Count of Delays by Day of Week", x="Day of Week", y="Incident Count") +
+  theme_minimal()
+
+
+```
+
+```{r}
+#| message: false
+#| echo: false
+#| label: transport-delay-number
+#| tbl-cap: Most Common Reasons for Delay on TTC
+#| 
+# Define the order of days
+days_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+
+# Convert 'Day' column to a factor with specific levels
+clean_transit_data$Day <- factor(clean_transit_data$Day, levels = days_order)
+
+avg_time_delayed_vehicle <- clean_transit_data |> group_by(Day) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
+
+
+avg_time_delayed_vehicle |>
+  ggplot(mapping = aes(x = Day, y = avg_delay)) +
+  geom_col() + 
+  labs(title="Average Delay by Day of Week", x="Vehicle Type", y="Average Delay (mins)") +
+  theme_minimal()
 ```
 
 # Discussion {#sec-discussion}

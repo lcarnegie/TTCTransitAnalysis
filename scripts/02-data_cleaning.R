@@ -96,7 +96,7 @@ combined_data <- combined_data |> mutate(
       "Late Entering Service" ~ "Late Entering Service", 
       "Overhead" ~ "Overhead", 
       "Rail/Switches" ~ "Rail/Switches", 
-      "NA" ~ "NA"
+      "NA" ~ "N/A"
     )
 )
 
