@@ -2,7 +2,7 @@
 
 ## Overview of Paper
 
-This self-directed paper analyzes relationships between average public transit delay in Toronto across various genres of transportation and relating variables. 
+This self-directed paper attempts to find patterns in public transit delays in Toronto across various genres of transportation (bus, subway, streetcar) and relating variables. 
 
 ## File Structure
 
