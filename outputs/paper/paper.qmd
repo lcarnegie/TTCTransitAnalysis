@@ -6,10 +6,12 @@ thanks: "Code and data are available at: https://github.com/lcarnegie/OpenDataTo
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
-format: pdf
+toc: true
 fig_caption: yes
 number-sections: true
 bibliography: references.bib
+
+format: pdf
 ---
 
 ```{r setup, include=FALSE}
@@ -25,6 +27,7 @@ library(data.table)
 library(dplyr)
 library(kableExtra)
 library(knitr)
+library(gridExtra)
 ```
 
 # Introduction
@@ -33,18 +36,31 @@ A key area of improvement in Canadian sustainability is in increasing the use of
 
 The Toronto Transit Commission (TTC) has been Toronto's transit system since 1921, serving the city population with a variety of transportation methods, particularly subways, streetcars, and buses. The openly available data surrounding the delays of these various modes of transport offers the opportunity to investigate the root causes of these delays and prompt discussion as how to rectify them. Understanding the common causes of a delay, when a delay is typically caused and where it was caused gives the TTC more insight into how to deliver their services to the public more efficiently and effectively, setting an improved example of what an effective transit agency looks like.
 
-This paper aims to find patterns of public transit delay time across various genres of transportation. First, the data source and analysis employed are covered in Section Two. Section Three then critically examines the data, delving deeper to arrive at various conclusions, as well as discussing implications and proposing new areas of exploration for this data.
+Patterns of public transit delay time are found across various genres of transportation. First, the data source and analysis employed are covered in Section Two. Section Three then critically examines the data, delving deeper to arrive at various conclusions, as well as discussing implications and proposing new areas of exploration for this data. The difference between bus, streetcar, and subway delays is shown to be stark. This analysis highlights the need to focus on especially reducing bus delays on several key routes.  
+
 
 # Data {#sec-data}
 
-```{r data import and sample table }
+```{r data import}
 #| message: false
 #| echo: false
-#| label: summary_stats_table
+#| label: import data
 #| tbl-cap: Sample of Cleaned Delay Data
 #| fig-align: center
 
 cleaned_transit_data <- read_csv(here::here("outputs/data/cleaned_dataset.csv"))
+
+#make each Line a category, not an integer
+cleaned_transit_data <- cleaned_transit_data |> mutate(Line = factor(Line))
+```
+
+```{r sample table }
+#| message: false
+#| echo: false
+#| label: sample_table
+#| tbl-cap: Sample of Cleaned Delay Data
+#| fig-align: center
+
 
 
 sample_table <- cleaned_transit_data |>
@@ -52,11 +68,8 @@ sample_table <- cleaned_transit_data |>
   rename(`Delay (Minutes)` = `Min Delay`) |>
   rename(Reason = Incident) |>
   rename(`Route/Line` = Line) |>
-  arrange(Date)
-
-cleaned_transit_data <- cleaned_transit_data |> mutate(Line = factor(Line))
-
-cleaned_transit_data
+  arrange(Date) |>
+  head(5)
 
 
 #Scaling taken from: 
@@ -67,7 +80,7 @@ kable(sample_table) |> kable_styling(latex_options = c("striped", "scale_down"))
 
 To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwaydata], and streetcar [@streetcardata] delay incidents for the year 2023 was downloaded using the OpenDataToronto R package [@odt] from the Toronto Open Data Catalogue. The data was then cleaned using R [@citeR], tidyverse [@tidyverse] and it's associated packages. After combining the datasets together, variables common between datasets and relevant to the analysis were selected, leading to a dataset with 93,569 observations. In the case of this analysis, the variables included were date (year, month, day), day of the week, Location of Delay Incident, Cause of Delay, the time delay (in minutes), Vehicle (bus, subway, streetcar), as well as the route/line (simplified to 'line') the vehicle was on when the incident happened.
 
-# Incident Type {#subsec1-data}
+## Incident Type {#subsec1-data}
 ```{r ggplot Common Delay Reasons}
 #| message: false
 #| echo: false
@@ -75,43 +88,82 @@ To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwa
 #| tbl-cap: Most Common Reasons for Delay on TTC
 
 #Bar chart of Reasons for delay vs. # of incidents
-# NA means a subway delay. Drop this and add that subways didn't have reasons. 
 
-cleaned_transit_data <- read_csv(here::here("outputs/data/cleaned_dataset.csv"))
+delay_dataset <- cleaned_transit_data
 
-cleaned_transit_data |>
+#Drop N/A incidents (they only apply to subways; subway dataset didn't indicate reasons with entries)
+delay_dataset <- delay_dataset |> filter(Incident != "N/A")
+
+delay_dataset |>
   count(Incident) |>
   ggplot(aes(x = n, y = reorder(Incident, n))) +
   geom_bar(stat="identity", fill="grey50") +
-  labs(title="Most Common Reasons for Delay", x="Count", y="Incident Type") +
+  labs(title="Bus and Streetcar Delay Reasons", x="Count", y="Incident Type") +
   theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5),
         panel.background = element_blank(),
         axis.line.y=element_line(color="black"),
         axis.ticks.y=element_blank(),
         panel.grid.major.x=element_line(color="grey80"),
-        panel.grid.minor=element_blank())
+        panel.grid.minor=element_blank(),
+        plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
 
 ```
 Subways didn't have any reason for delay, yet have the most incidence of delay. 
 
 
-# Line/Route {#subsec2-data}
-```{r ggplot routes with avg. delay}
+## Line/Route {#subsec2-data}
+```{r ggplot top 10 routes with longest avg. delay}
+#| message: false
+#| echo: false
+#| label: lines-longest-delays
+#| tbl-cap: Incidence of Delay, by Route/Line 
+
+delay_by_line <- cleaned_transit_data
+
+delay_by_line <- delay_by_line |> 
+                 group_by(Line) |> 
+                 summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop") |> 
+                 arrange(desc(avg_delay)) |> 
+                 head(10)
+
+# Plotting
+ggplot(delay_by_line, aes(x = reorder(Line, desc(avg_delay)), y = avg_delay)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Route/Line", y = "Average Delay (Minutes)", title = "Top 10 Routes with Longest Average Delay") +
+  theme_minimal() +
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
+
+```
+```{r ggplot top 10 routes with most delay incidence}
 #| message: false
 #| echo: false
 #| label: lines-most-delays
 #| tbl-cap: Incidence of Delay, by Route/Line 
 
-cleaned_transit_data
+delay_by_line <- cleaned_transit_data
 
-# delay_by_line <- cleaned_transit_data
-# 
-# delay_by_line <- delay_by_line |> group_by(Line) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop") 
+delay_by_line <- delay_by_line |> 
+                 group_by(Line) |> 
+                 summarise(num_delays = n(), .groups = "drop") |> 
+                 arrange(desc(num_delays)) |> 
+                 head(10)
+delay_by_line
+
+
+# Plotting
+ggplot(delay_by_line, aes(x = reorder(Line, desc(num_delays)), y = num_delays)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Route/Line", y = "Delay Incidence Count", title = "Top 10 Routes with Highest Delay Incidence") +
+  theme_minimal() +
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
+
 
 ```
 
-
-# Vehicle Type {#subsec3-data}
+## Vehicle Type {#subsec3-data}
 ```{r ggplot transport with longest avg. delays}
 #| message: false
 #| echo: false
@@ -144,7 +196,8 @@ num_incidents_vehicle |>
   theme_minimal()
 
 ```
-# Day of Week {#subsec4-data}
+
+## Day of Week {#subsec4-data}
 ```{r ggplot Day of Week with Delay incidence}
 #| message: false
 #| echo: false
@@ -179,14 +232,17 @@ num_incidents_vehicle |>
 #| label: transport-delay-number
 #| tbl-cap: Most Common Reasons for Delay on TTC
 #| 
+
+dow_data <- cleaned_transit_data
+
 # Define the order of days
 days_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
 
 # Convert 'Day' column to a factor with specific levels
-clean_transit_data$Day <- factor(clean_transit_data$Day, levels = days_order)
+dow_data$Day <- factor(dow_data$Day, levels = days_order)
 
 #create tibble with avg delay time
-avg_time_delayed_vehicle <- clean_transit_data |> group_by(Day) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
+avg_time_delayed_vehicle <- dow_data |> group_by(Day) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
 
 #plot
 avg_time_delayed_vehicle |>
@@ -196,10 +252,12 @@ avg_time_delayed_vehicle |>
   theme_minimal()
 ```
 
-# Time of Year {#subsec5-data}
+
+## Time of Year {#subsec5-data}
 ```{r ggplot avg delay change monthly}
 #| message: false
 #| echo: false
+#| warning: false
 #| label: monthly-delay-times
 #| tbl-cap: Average Monthy Delay Times
 #Line chart of how avg. delay time changes over the months
@@ -239,11 +297,11 @@ avg_delay |>
 
 # Discussion {#sec-discussion}
 
-# Results {#subsec1-discussion}
+## Results {#subsec1-discussion}
 
-# Implications {#subsec2-discussion}
+## Implications {#subsec2-discussion}
 
-# New Areas of Exploration {#subsec3-discussion}
+## New Areas of Exploration {#subsec3-discussion}
 
 # Conclusion
 
@@ -253,3 +311,5 @@ avg_delay |>
 nocite: |
   @citeR, @ggplot, @odt, @janitor, @lubridate, @tidyverse, @dplyr, @ggplot, @testthat, @MartinWittmanLi, @diaetal, @anderson,
 ---
+
+# Appendix: TTC Route Nomenclature
