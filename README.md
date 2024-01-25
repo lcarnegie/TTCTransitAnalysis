@@ -24,5 +24,5 @@ Here is a quick guide to reproducing my graphs and tables.
 ## Notes: 
 
 My folder structure and workflow is based on one created by the legendary Rohan Alexander, available at https://github.com/RohanAlexander/starter_folder
-### LLM Usage Disclosure: Aspects of my R code and paper were written and edited with the assistance of Large Language Models, in particular Claude-2 and GPT-4 (Microsoft Copilot). The chat history with both models are available in inputs/llms/usage.txt
+### LLM Usage Disclosure: Aspects of my R code and paper were written and edited with the assistance of Large Language Models, in particular Claude-2 and GPT-4 (Microsoft Copilot). The chat history with both models are available in inputs/llms
 
