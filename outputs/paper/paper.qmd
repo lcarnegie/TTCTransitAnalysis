@@ -34,9 +34,10 @@ library(gridExtra)
 
 A key area of improvement in Canadian sustainability is in increasing the use of public transportation in big cities like Toronto. This makes sense, since cars account for about 80% of transportation emissions [@diaetal]. However, a major drawback preventing the widespread use of public transportation is the existence of delays within the transit system. These delays push citizens toward using less sustainable alternatives like private cars, leading to congestion on highways and consequent increased emissions. The lack of timely transit services have a demonstrated impact on traffic. One study by Anderson et al. estimated a whopping 47 percent increase in highway delay when transit service ceases completely in Los Angeles [@anderson], a large city like Toronto.  It is then imperative that policy makers understand and fix these delays to improve sustainability. 
 
-The "TTC", or Toronto Transit Commission, has been Toronto's transit system since 1921, serving the city population with mainly subways, streetcars, buses, along with smaller-scale transport offerings. The openly available data surrounding the delays of these various modes of transport offers opportunity to investigate the root causes of the longer-lasting delays. In addition, delays give an idea of  Understanding what caused a delay, when it was caused and where it was caused could give the TTC more insight into how to deliver their services to the public more efficiently and effectively, setting an examples of what an effective transit agency could look like. 
+The "TTC", or Toronto Transit Commission, has been Toronto's transit system since 1921, serving the city population with mainly subways, streetcars, buses, along with smaller-scale transport offerings. The openly available data surrounding the delays of these various modes of transport offers opportunity to investigate the root causes of the longer-lasting delays. Delays are likely the best way to assess a transit agency's performance from both the rider and management perspective, since riders' experience is typically determined through how low waiting and travel times are, while performance of staff is assessed "in terms of 
+on-time performance standards (or adherence to schedules)" [@diab2015bus]. Both of these metrics are highly correlated with delay time. Therefore, understanding what caused a delay, when it was caused and where it was caused could give the TTC more insight into how to deliver their services to the public more efficiently and effectively. 
 
-This paper finds relationships and patterns of public transit delay time across various genres of transportations. The paper is structured in that Section Two covers the data source, and analysis employed. Section Three critically examines the data, comes to several conclusions and proposes new areas of exploration of this dataset.  The difference between bus, streetcar, and subway delays is shown to be stark. This analysis highlights the need to focus on especially on reducing bus delays on several key routes to improve efficiency and effectiveness of service.
+This paper finds relationships and patterns of public transit delay time across various genres of transportation. The paper is structured in that Section Two covers the data source, and analysis employed. Section Three critically examines the data, comes to several conclusions and proposes new areas of exploration of this dataset. The difference between bus, streetcar, and subway delays is shown to be stark. This analysis highlights the need to focus on especially on reducing bus delays on several key routes to improve efficiency and effectiveness of service.
 
 
 # Data Analysis {#sec-data}
@@ -409,9 +410,4 @@ Luckily, in the same interview, conducted in late 2023, he provides a general ov
 
 
 # References
-
----
-nocite: |
-  @citeR, @ggplot, @odt, @janitor, @lubridate, @tidyverse, @dplyr, @ggplot, @testthat, @MartinWittmanLi, @diaetal, @anderson,
----
 
