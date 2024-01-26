@@ -1,8 +1,9 @@
 ---
-title: "Exploring TTC Delays"
-subtitle: "A Multimodal Analysis"
+title: "Transit Delays in the Toronto Transit Commission"
+subtitle: "An Exploratory Analysis with Open Data Toronto"
+
 author: Luca Carnegie
-thanks: "Code and data are available at: https://github.com/lcarnegie/OpenDataToronto. Thank you to Nescafé coffee, Rajan Maghera, Hannah Yu, and Sehar Bajwa for your love and support - could not have done it without you. No thanks go to Rohan in particular for not pointing out all the R he wanted us to learn that was in his textbook... sigh. I will try the appendix cocktails someday, though. :)"
+thanks: "Code and data are available at: https://github.com/lcarnegie/OpenDataToronto. Thank you to Nescafé coffee, Rajan Maghera, Hannah Yu, and Sehar Bajwa for your love and support - I could not have done it without you. Special thanks go to Rohan Alexander for the immense amount of R he taught me in such a short time and his extremely easy-to-navigate textbook (that has a cocktail appendix, fortunately)."
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
@@ -39,7 +40,7 @@ The Toronto Transit Commission (TTC) has been Toronto's transit system since 192
 Patterns of public transit delay time are found across various genres of transportation. First, the data source and analysis employed are covered in Section Two. Section Three then critically examines the data, delving deeper to arrive at various conclusions, as well as discussing implications and proposing new areas of exploration for this data. The difference between bus, streetcar, and subway delays is shown to be stark. This analysis highlights the need to focus on especially reducing bus delays on several key routes.  
 
 
-# Data {#sec-data}
+# Data Analysis {#sec-data}
 ```{r data import}
 #| message: false
 #| echo: false
@@ -81,7 +82,7 @@ kable(sample_table, format = "markdown") |> kable_styling(latex_options = c("sca
 ```
 
 
-## Incident Type {#subsec1-data}
+## Reason of Delay {#subsec1-data}
 ```{r ggplot Common Delay Reasons}
 #| message: false
 #| echo: false
@@ -110,10 +111,191 @@ delay_dataset |>
         plot.title = element_text(hjust = 0.5))
 
 ```
-Subways didn't have any reason for delay, yet have the most incidence of delay. 
+Subways didn't have any reason for delay, yet have the most incidence of delay. Was dropped from the data.  
 
 
-## Line/Route {#subsec2-data}
+## Day of Week {#subsec2-data}
+```{r ggplot Day of Week with Delay Incidence}
+#| message: false
+#| echo: false
+#| label: transport-delay-time
+#| tbl-cap: Most Common Reasons for Delay on TTC
+#Day of week with most incidence of delay
+
+# Inspired by: https://stackoverflow.com/questions/34280140/order-bar-graph-in-order-in-this-case-as-per-days-of-week 
+
+dow_data <- cleaned_transit_data
+
+# Define the order of days
+days_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+
+# Convert 'Day' column to a factor with specific levels
+dow_data$Day <- factor(dow_data$Day, levels = days_order)
+
+# Now create the plot
+num_incidents_vehicle <- dow_data |> arrange(Day) |> group_by(Day) |> summarise(num_incidents = n(), .groups = "drop")
+
+num_incidents_vehicle |>
+  ggplot(mapping = aes(x = Day, y = num_incidents)) +
+  geom_point() +
+  geom_line(group = 1) +
+  labs(title="Number of Incidents by Day of Week", x="Day of Week", y="Incident Count") +
+  theme_minimal() +
+  ylim(0, max(num_incidents_vehicle$num_incidents) + 1) +
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
+
+
+
+```
+```{r ggplot Day of Week with Avg. Delays}
+#| message: false
+#| echo: false
+#| label: transport-delay-number
+#| tbl-cap: Most Common Reasons for Delay on TTC
+#| 
+
+dow_data <- cleaned_transit_data
+
+# Define the order of days
+days_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+
+# Convert 'Day' column to a factor with specific levels
+dow_data$Day <- factor(dow_data$Day, levels = days_order, ordered = TRUE)
+
+#create tibble with avg delay time
+avg_time_delayed_vehicle <- dow_data |> group_by(Day) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
+
+#plot
+avg_time_delayed_vehicle |>
+  ggplot(mapping = aes(x = Day, y = `avg_delay`)) +
+  geom_point() +
+  geom_line(group = 1) + 
+  labs(title="Average Delay Time by Day of Week", x="Day of Week", y="Average Delay (mins)") +
+  theme_minimal() +
+  ylim(0, max(avg_time_delayed_vehicle$avg_delay) + 1) + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
+```
+
+
+
+
+## Vehicle Type {#subsec3-data}
+```{r ggplot transport with longest avg. delays}
+#| message: false
+#| echo: false
+#| label: mode-longest-delays
+#| tbl-cap: Most Common Reasons for Delay on TTC
+#Bar graph of mode of transport with longest delays 
+
+avg_time_delayed_vehicle <- cleaned_transit_data |> group_by(vehicle) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
+
+
+avg_time_delayed_vehicle |>
+  ggplot(mapping = aes(x = vehicle, y = avg_delay)) +
+  geom_col() + 
+  labs(title="Average Delay by Vehicle", x="Vehicle Type", y="Average Delay (mins)") +
+  theme_minimal() +
+  theme(plot.title.position = "plot",
+      plot.title = element_text(hjust = 0.5))
+```
+```{r ggplot transport with most incidence of delays }
+#| message: false
+#| echo: false
+#| label: most-incidents-vehicle
+
+#Bar graph of mode of transport with most incidence of delays 
+
+most_delayed_vehicle <- cleaned_transit_data
+
+num_incidents_vehicle <- most_delayed_vehicle |> group_by(vehicle) |> summarise(num_incidents = n(), .groups = "drop")
+
+num_incidents_vehicle |>
+  ggplot(mapping = aes(x = vehicle, y = num_incidents)) +
+  geom_col() + 
+  labs(title="Number of Incidents by Vehicle", x="Vehicle Type", y="Number of Incidents") +
+  theme_minimal() + 
+   theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
+
+```
+
+
+
+
+## Time of Year {#subsec4-data}
+```{r ggplot incidence change monthly}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: monthly-delay-incidence
+#| tbl-cap: Delay Incidence by Month
+#Line chart of how avg. delay time changes over the months
+
+# create tibble with month col
+month_dataset <- cleaned_transit_data |> mutate(month(Date)) |> rename(cleaned_transit_data$month, `month` = `month(Date)`)
+
+#Calculate avg. delays 
+delay_incidence <- month_dataset |> group_by(month, vehicle) |> summarise(incidence = n(), .groups = "drop")
+
+
+# convert month to factor (categorical data)
+delay_incidence$month <- factor(delay_incidence$month, levels = 1:12, labels = month.abb[1:12])
+
+# plot the graph
+delay_incidence |>
+  ggplot(aes(x=month, y= `incidence`, color=vehicle, group=vehicle)) +
+  geom_line() +
+  labs(title="Delay Count per Month, by Vehicle", x="Month", y="Count of Delays") +
+  scale_color_manual(values=c("blue","green", "red"), labels=c("Bus","Streetcar", "Subway")) +
+  theme_minimal()
+```
+```{r ggplot avg delay change monthly}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: monthly-delay-times
+#| tbl-cap: Average Monthy Delay Times
+#Line chart of how avg. delay time changes over the months
+
+# create tibble with month col
+month_dataset <- cleaned_transit_data |> mutate(month(Date)) |> rename(cleaned_transit_data$month, `month` = `month(Date)`)
+
+#Calculate avg. delays 
+avg_delay <- month_dataset |> group_by(month, vehicle) |> summarise(`Min Delay` = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
+
+
+# convert month to factor (categorical data)
+avg_delay$month <- factor(avg_delay$month, levels = 1:12, labels = month.abb[1:12])
+
+# plot the graph
+avg_delay |>
+  ggplot(aes(x=month, y=`Min Delay`, color=vehicle, group=vehicle)) +
+  geom_line() +
+  labs(title="Monthly Average Delay Time, by Vehicle", x="Month", y="Monthly Avg. Delay (minutes)") +
+  scale_color_manual(values=c("blue","green", "red"), labels=c("Bus","Streetcar", "Subway"))+
+  theme_minimal() +
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Line/Route {#subsec5-data}
 ```{r ggplot top 10 routes with longest avg. delay}
 #| message: false
 #| echo: false
@@ -137,7 +319,6 @@ ggplot(delay_by_line, aes(x = reorder(Line, desc(avg_delay)), y = avg_delay)) +
         plot.title = element_text(hjust = 0.5))
 
 ```
-
 ```{r ggplot top 10 routes with most delay incidence}
 #| message: false
 #| echo: false
@@ -166,137 +347,6 @@ ggplot(delay_by_line, aes(x = reorder(Line, desc(num_delays)), y = num_delays)) 
 
 ```
 
-## Vehicle Type {#subsec3-data}
-```{r ggplot transport with longest avg. delays}
-#| message: false
-#| echo: false
-#| label: mode-longest-delays
-#| tbl-cap: Most Common Reasons for Delay on TTC
-#Bar graph of mode of transport with longest delays 
-
-avg_time_delayed_vehicle <- cleaned_transit_data |> group_by(vehicle) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
-
-
-avg_time_delayed_vehicle |>
-  ggplot(mapping = aes(x = vehicle, y = avg_delay)) +
-  geom_col() + 
-  labs(title="Average Delay by Vehicle", x="Vehicle Type", y="Average Delay (mins)") +
-  theme_minimal()
-```
-```{r ggplot transport with most incidence of delays }
-#| message: false
-#| echo: false
-#| label: most-incidents-vehicle
-
-#Bar graph of mode of transport with most incidence of delays 
-
-most_delayed_vehicle <- cleaned_transit_data
-
-num_incidents_vehicle <- most_delayed_vehicle |> group_by(vehicle) |> summarise(num_incidents = n(), .groups = "drop")
-
-num_incidents_vehicle |>
-  ggplot(mapping = aes(x = vehicle, y = num_incidents)) +
-  geom_col() + 
-  labs(title="Number of Incidents by Vehicle", x="Vehicle Type", y="Number of Incidents") +
-  theme_minimal()
-
-```
-
-## Day of Week {#subsec4-data}
-```{r ggplot Day of Week with Delay incidence}
-#| message: false
-#| echo: false
-#| label: transport-delay-time
-#| tbl-cap: Most Common Reasons for Delay on TTC
-#Day of week with most incidence of delay
-
-# Inspired by: https://stackoverflow.com/questions/34280140/order-bar-graph-in-order-in-this-case-as-per-days-of-week 
-
-dow_data <- cleaned_transit_data
-
-# Define the order of days
-days_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
-
-# Convert 'Day' column to a factor with specific levels
-dow_data$Day <- factor(dow_data$Day, levels = days_order)
-
-# Now create the plot
-num_incidents_vehicle <- dow_data |> arrange(Day) |> group_by(Day) |> summarise(num_incidents = n(), .groups = "drop")
-
-num_incidents_vehicle |>
-  ggplot(mapping = aes(x = Day, y = num_incidents)) +
-  geom_col() +
-  labs(title="Incidence of Delay by Day of Week", x="Day of Week", y="Incident Count") +
-  theme_minimal()
-
-
-```
-```{r ggplot Day of Week with Avg. Delays}
-#| message: false
-#| echo: false
-#| label: transport-delay-number
-#| tbl-cap: Most Common Reasons for Delay on TTC
-#| 
-
-dow_data <- cleaned_transit_data
-
-# Define the order of days
-days_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
-
-# Convert 'Day' column to a factor with specific levels
-dow_data$Day <- factor(dow_data$Day, levels = days_order)
-
-#create tibble with avg delay time
-avg_time_delayed_vehicle <- dow_data |> group_by(Day) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
-
-#plot
-avg_time_delayed_vehicle |>
-  ggplot(mapping = aes(x = Day, y = avg_delay)) +
-  geom_col() + 
-  labs(title="Average Delay Time by Day of Week", x="Vehicle Type", y="Average Delay (mins)") +
-  theme_minimal()
-```
-
-
-## Time of Year {#subsec5-data}
-```{r ggplot avg delay change monthly}
-#| message: false
-#| echo: false
-#| warning: false
-#| label: monthly-delay-times
-#| tbl-cap: Average Monthy Delay Times
-#Line chart of how avg. delay time changes over the months
-
-# create tibble with month col
-month_dataset <- cleaned_transit_data |> mutate(month(Date)) |> rename(cleaned_transit_data$month, `month` = `month(Date)`)
-
-#Calculate avg. delays 
-avg_delay <- month_dataset |> group_by(month, vehicle) |> summarise(`Min Delay` = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
-
-
-# convert month to factor (categorical data)
-avg_delay$month <- factor(avg_delay$month, levels = 1:12, labels = month.abb[1:12])
-
-# plot the graph
-avg_delay |>
-  ggplot(aes(x=month, y=`Min Delay`, color=vehicle, group=vehicle)) +
-  geom_line() +
-  labs(title="Average Monthly Delays by Vehicle", x="Month", y="Monthly Avg. Delay (minutes)") +
-  scale_color_manual(values=c("blue","green", "red"), labels=c("Bus","Streetcar", "Subway")) +
-  theme_minimal()
-```
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -308,8 +358,7 @@ avg_delay |>
 
 ## New Areas of Exploration {#subsec3-discussion}
 
-# Conclusion
-
+# Appendix 
 # References
 
 ---
@@ -317,4 +366,3 @@ nocite: |
   @citeR, @ggplot, @odt, @janitor, @lubridate, @tidyverse, @dplyr, @ggplot, @testthat, @MartinWittmanLi, @diaetal, @anderson,
 ---
 
-# Appendix: TTC Route Nomenclature
