@@ -1,9 +1,8 @@
 ---
-title: "Transit Delays in the Toronto Transit Commission"
+title: "Bring More Buses: Transit Delays in the Toronto Transit Commission"
 subtitle: "An Exploratory Analysis with Open Data Toronto"
-
 author: Luca Carnegie
-thanks: "Code and data are available at: https://github.com/lcarnegie/OpenDataToronto. Thank you to Nescafé coffee, Rajan Maghera, Hannah Yu, and Sehar Bajwa for your love and support - I could not have done it without you. Special thanks go to Rohan Alexander for the immense amount of R he taught me in such a short time and his extremely easy-to-navigate textbook (that has a cocktail appendix, fortunately)."
+thanks: "Code and data are available at: https://github.com/lcarnegie/TTCTransitAnalysis. Thank you to Nescafé coffee, Rajan Maghera, Hannah Yu, and Sehar Bajwa for your love and support - I could not have done it without you. Special thanks go to Rohan Alexander for the immense amount of R he taught me in such a short time and his extremely easy-to-navigate textbook (that has a cocktail appendix, fortunately)."
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
@@ -33,20 +32,17 @@ library(gridExtra)
 
 # Introduction
 
-A key area of improvement in Canadian sustainability is in increasing the use of public transportation in big cities like Toronto. This makes sense, since cars account for about 80% of transportation emissions [@diaetal]. A major drawback preventing the widespread use of public transportation is the existence of delays within transit systems. These delays push citizens toward using less sustainable alternatives like private cars, leading to congestion on highways and consequent increased emissions. The lack of timely transit services have a demonstrated impact on traffic. One study by Anderson et al. estimated a whopping 47 percent increase in highway delay when transit service ceased completely in a big city such as Los Angeles [@anderson]. Learning from this example, it is imperative that policy makers understand and fix these delays to improve sustainability in Toronto.
+A key area of improvement in Canadian sustainability is in increasing the use of public transportation in big cities like Toronto. This makes sense, since cars account for about 80% of transportation emissions [@diaetal]. However, a major drawback preventing the widespread use of public transportation is the existence of delays within the transit system. These delays push citizens toward using less sustainable alternatives like private cars, leading to congestion on highways and consequent increased emissions. The lack of timely transit services have a demonstrated impact on traffic. One study by Anderson et al. estimated a whopping 47 percent increase in highway delay when transit service ceases completely in Los Angeles [@anderson], a large city like Toronto.  It is then imperative that policy makers understand and fix these delays to improve sustainability. 
 
-The Toronto Transit Commission (TTC) has been Toronto's transit system since 1921, serving the city population with a variety of transportation methods, particularly subways, streetcars, and buses. The openly available data surrounding the delays of these various modes of transport offers the opportunity to investigate the root causes of these delays and prompt discussion as how to rectify them. Understanding the common causes of a delay, when a delay is typically caused and where it was caused gives the TTC more insight into how to deliver their services to the public more efficiently and effectively, setting an improved example of what an effective transit agency looks like.
+The "TTC", or Toronto Transit Commission, has been Toronto's transit system since 1921, serving the city population with mainly subways, streetcars, buses, along with smaller-scale transport offerings. The openly available data surrounding the delays of these various modes of transport offers opportunity to investigate the root causes of the longer-lasting delays. In addition, delays give an idea of  Understanding what caused a delay, when it was caused and where it was caused could give the TTC more insight into how to deliver their services to the public more efficiently and effectively, setting an examples of what an effective transit agency could look like. 
 
-Patterns of public transit delay time are found across various genres of transportation. First, the data source and analysis employed are covered in Section Two. Section Three then critically examines the data, delving deeper to arrive at various conclusions, as well as discussing implications and proposing new areas of exploration for this data. The difference between bus, streetcar, and subway delays is shown to be stark. This analysis highlights the need to focus on especially reducing bus delays on several key routes.  
+This paper finds relationships and patterns of public transit delay time across various genres of transportations. The paper is structured in that Section Two covers the data source, and analysis employed. Section Three critically examines the data, comes to several conclusions and proposes new areas of exploration of this dataset.  The difference between bus, streetcar, and subway delays is shown to be stark. This analysis highlights the need to focus on especially on reducing bus delays on several key routes to improve efficiency and effectiveness of service.
 
 
 # Data Analysis {#sec-data}
-```{r data import}
+```{r data-import}
 #| message: false
 #| echo: false
-#| label: import data
-#| tbl-cap: Sample of Cleaned Delay Data
-#| fig-align: center
 
 cleaned_transit_data <- read_csv(here::here("outputs/data/cleaned_dataset.csv"))
 
@@ -54,14 +50,15 @@ cleaned_transit_data <- read_csv(here::here("outputs/data/cleaned_dataset.csv"))
 cleaned_transit_data <- cleaned_transit_data |> mutate(Line = factor(Line))
 ```
 
-To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwaydata], and streetcar [@streetcardata] delay incidents for the year 2023 were downloaded using the OpenDataToronto R package [@odt] from the Toronto Open Data Catalogue. The data was then cleaned using R [@citeR], tidyverse [@tidyverse] and it's associated packages. After combining the datasets together, variables common between datasets and relevant to the analysis were selected, creating a dataset with 93,569 observations. For this analysis, the date (year, month, day), time, day of week, vehicle type, route/line, incident location, cause of delay, and time delay (in minutes) were considered. 
+To investigate transit delays in the TTC, recorded data on bus [@busdata] , streetcar [@streetcardata], and subway [@subwaydata] delay incidents for the year 2023 were obtained using the OpenDataToronto R package [@odt], providing data from the Toronto Open Data Catalogue. All the datasets were current as of January 18th, 2024. 
 
-```{r sample table }
+All the data was then cleaned using R [@citeR] and it's tidyverse [@tidyverse], janitor [@janitor], and lubridate [@lubridate] packages. Variables common between datasets and relevant to this analysis were selected, creating a combined dataset with 93,569 observations made over the year. For this analysis, the date (year, month, day), time, day of week, vehicle type, route/line, incident location, cause of delay, and time delay gap (in minutes) were made of interest. A sample of the cleaned dataset is shown in [@tbl-sample]. In the analysis itself, the knitr [@knitr] and ggplot2 [@ggplot] R packages were used to create the tables and graphs. 
+
+```{r tbl-sample}
 #| message: false
-#| warning: false
 #| echo: false
-#| label: sample_table
-#| tbl-cap: Sample of Cleaned Delay Data
+#| warning: false
+#| tbl-cap: Delay Incidence by Month
 #| fig-align: center
 
 
@@ -81,13 +78,18 @@ sample_table <- cleaned_transit_data |>
 kable(sample_table, format = "markdown") |> kable_styling(latex_options = c("scale_down"))
 ```
 
+The dataset, primarily categorical, was analyzed on a variable-by-variable basis. Each variable, barring ‘delay reason’, was examined in two ways: through its relationship with delay occurrences and its impact on the average delay duration, measured in minutes.
 
 ## Reason of Delay {#subsec1-data}
-```{r ggplot Common Delay Reasons}
+
+First, we assess the various recorded reasons of a particular delay on the TTC and their impacts. In @fig-reasons-delay, we observe several key groupings of delay reasons for buses and streetcars. Before analyzing further, however, it is of important note that the reasons for subway delay were not recorded during data collection, subways must be omitted from this particular chart. 
+
+```{r fig-reasons-delay}
 #| message: false
 #| echo: false
-#| label: common-reasons-delay
-#| tbl-cap: Most Common Reasons for Delay on TTC
+#| warning: false
+#| tbl-cap: Distribution of Bus and Streetcar Delay Reasons 
+#| fig-align: center
 
 #Bar chart of Reasons for delay vs. # of incidents
 
@@ -95,6 +97,8 @@ delay_dataset <- cleaned_transit_data
 
 #Drop N/A incidents (they only apply to subways; subway dataset didn't indicate reasons with entries)
 delay_dataset <- delay_dataset |> filter(Incident != "N/A")
+
+summarized <- delay_dataset |> group_by(Incident) |> summarise(count = n(), .groups = "drop")
 
 delay_dataset |>
   count(Incident) |>
@@ -111,15 +115,19 @@ delay_dataset |>
         plot.title = element_text(hjust = 0.5))
 
 ```
-Subways didn't have any reason for delay, yet have the most incidence of delay. Was dropped from the data.  
 
+In @fig-reasons-delay, Mechanical Issues, Operational Issues, and Route Diversion emerge as the top three causes of delays in streetcars and buses across the TTC. The incidence of these delays varies significantly. In particular, there 6682 more mechanical delays than operational delays and 13083 more mechanical delays than diversion delays.
 
 ## Day of Week {#subsec2-data}
-```{r ggplot Day of Week with Delay Incidence}
+
+Next, the variation of delay incidents by day of the week was analyzed. Figure @fig-dow-1 shows the number of delay incidents for each day.
+
+```{r fig-dow-1}
 #| message: false
 #| echo: false
-#| label: transport-delay-time
-#| tbl-cap: Most Common Reasons for Delay on TTC
+#| warning: false
+#| tbl-cap: Number of Delay Incidents, aggregated by Day of Week
+#| fig-align: center
 #Day of week with most incidence of delay
 
 # Inspired by: https://stackoverflow.com/questions/34280140/order-bar-graph-in-order-in-this-case-as-per-days-of-week 
@@ -148,12 +156,15 @@ num_incidents_vehicle |>
 
 
 ```
-```{r ggplot Day of Week with Avg. Delays}
+
+The frequency of delays climbs steadily from Sunday to Friday before peaking on Saturday. However, there does not appear to be a clear upward or downward trend in delays over the course of the week. Further analysis on a weekly basis would be needed to determine if there is a statistically significant pattern in delays based on the day. However, the data indicates overall that weekends, particularly Saturdays, experience more delay incidents than weekdays.
+
+```{r fig-dow-2}
 #| message: false
 #| echo: false
-#| label: transport-delay-number
-#| tbl-cap: Most Common Reasons for Delay on TTC
-#| 
+#| warning: false
+#| tbl-cap: Average Delay Time, aggregated by Day of Week
+#| fig-align: center
 
 dow_data <- cleaned_transit_data
 
@@ -178,32 +189,19 @@ avg_time_delayed_vehicle |>
         plot.title = element_text(hjust = 0.5))
 ```
 
-
+Next, we looked at average delay duration by day. Figure @fig-dow-2 displays the average delay time in minutes for each day. The average remains relatively consistent across the week, hovering around 15 minutes per delay incident.
 
 
 ## Vehicle Type {#subsec3-data}
-```{r ggplot transport with longest avg. delays}
+
+Next, we graph the data to check for noticeable differences across different genres of transportation. We see a noticeable difference in delays by vehicle in Figures @fig-vehicle-1 and @fig-vehicle-2
+
+```{r fig-vehicle-1}
 #| message: false
 #| echo: false
-#| label: mode-longest-delays
-#| tbl-cap: Most Common Reasons for Delay on TTC
-#Bar graph of mode of transport with longest delays 
-
-avg_time_delayed_vehicle <- cleaned_transit_data |> group_by(vehicle) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
-
-
-avg_time_delayed_vehicle |>
-  ggplot(mapping = aes(x = vehicle, y = avg_delay)) +
-  geom_col() + 
-  labs(title="Average Delay by Vehicle", x="Vehicle Type", y="Average Delay (mins)") +
-  theme_minimal() +
-  theme(plot.title.position = "plot",
-      plot.title = element_text(hjust = 0.5))
-```
-```{r ggplot transport with most incidence of delays }
-#| message: false
-#| echo: false
-#| label: most-incidents-vehicle
+#| warning: false
+#| tbl-cap: Number of Incidents for each mode of transportation
+#| fig-align: center
 
 #Bar graph of mode of transport with most incidence of delays 
 
@@ -221,16 +219,43 @@ num_incidents_vehicle |>
 
 ```
 
+Figure @fig-vehicle-1 shows that in 2023, buses had 56207 recorded delay incidents in 2023. This is more than twice as many as subways and close to three times more than streetcars.
+
+```{r fig-vehicle-2}
+#| message: false
+#| echo: false
+#| warning: false
+#| tbl-cap: Average Delay Time for each Mode of Transportation
+#| fig-align: center
+
+#Bar graph of mode of transport with longest delays 
+
+avg_time_delayed_vehicle <- cleaned_transit_data |> group_by(vehicle) |> summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop")
+
+
+avg_time_delayed_vehicle |>
+  ggplot(mapping = aes(x = vehicle, y = avg_delay)) +
+  geom_col() + 
+  labs(title="Average Delay by Vehicle", x="Vehicle Type", y="Average Delay (mins)") +
+  theme_minimal() +
+  theme(plot.title.position = "plot",
+      plot.title = element_text(hjust = 0.5))
+```
+
+In Figure @fig-vehicle-2, however, we do not see as large a difference in average delay times across different genres of transportation, however. Buses had the longest average delay times, at around 20 minutes, but subway had only 3 minutes of delay time on average, making for a fairly sizeable gap delay times. Interestingly, although there was less incidence of streetcar delay than subway delay, streetcar routes tended to be delayed longer on average throughout 2023.
 
 
 
 ## Time of Year {#subsec4-data}
-```{r ggplot incidence change monthly}
+
+To investigate how TTC delays change throughout the year, Figures @fig-monthly-1 and @fig-monthly-2 were constructed. The graphs show monthly changes in delay count and average delay time over 2023. Buses, streetcars, and subways are represented by blue, green, and red lines, respectively.
+
+```{r fig-monthly-1}
 #| message: false
 #| echo: false
 #| warning: false
-#| label: monthly-delay-incidence
 #| tbl-cap: Delay Incidence by Month
+#| fig-align: center
 #Line chart of how avg. delay time changes over the months
 
 # create tibble with month col
@@ -251,12 +276,14 @@ delay_incidence |>
   scale_color_manual(values=c("blue","green", "red"), labels=c("Bus","Streetcar", "Subway")) +
   theme_minimal()
 ```
-```{r ggplot avg delay change monthly}
+
+In @fig-monthly-1 we see how the count of delays changes throughout 2023 for each mode of transportation. Buses have the highest incidence of delays throughout year with the count generally trending upward as the year progresses, peaking in November with 5322 incidents. Incidence of subway and street car delays are significantly lower, but also trend upwards as the year progresses. Overall, this figure presents similar findings to Figure @fig-vehicle-1 in section 2.3 - buses tend to have more incidences of delay than both streetcars and subways overall.
+
+```{r fig-monthly-2}
 #| message: false
 #| echo: false
 #| warning: false
-#| label: monthly-delay-times
-#| tbl-cap: Average Monthy Delay Times
+#| tbl-cap: Average Delay Time, by Month
 #Line chart of how avg. delay time changes over the months
 
 # create tibble with month col
@@ -280,50 +307,18 @@ avg_delay |>
         plot.title = element_text(hjust = 0.5))
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+When looking at changes in average delay times throughout  2023, there are several observations we can make. With buses, we observe a slight downward trend in delay time as the year progresses, with delays going from an monthly average of 23.6 minutes to 18.2 minutes by the end of the year. Subway delay times stay more or less constant, on average, at around 3.2 minutes, the lowest average delay time of all three. With streetcars, however, although delay times tend to trend downward throughout the year, there is a noticeable change in delay times in the summer, with a spike in delay time in the spring and summer months that eclipses even buses in the month of June. 
 
 ## Line/Route {#subsec5-data}
-```{r ggplot top 10 routes with longest avg. delay}
+
+Finally, the delays on particular subway lines and bus/streetcar routes were examined. Given the large number of different transit routes offered by the TTC, this analysis focuses on the 10 routes with the highest average delay times and highest incidence of delay. These findings are illustrated in Figure @fig-highest-1 and Figure @fig-highest-2. A short guide to the route number nomenclature of the TTC is provided in the Appendix for the reader's convenience. 
+
+```{r fig-highest-1}
 #| message: false
 #| echo: false
-#| label: lines-longest-delays
-#| tbl-cap: Incidence of Delay, by Route/Line 
-
-delay_by_line <- cleaned_transit_data
-
-delay_by_line <- delay_by_line |> 
-                 group_by(Line) |> 
-                 summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop") |> 
-                 arrange(desc(avg_delay)) |> 
-                 head(10)
-
-# Plotting
-ggplot(delay_by_line, aes(x = reorder(Line, desc(avg_delay)), y = avg_delay)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Route/Line", y = "Average Delay (Minutes)", title = "Top 10 Routes with Longest Average Delay") +
-  theme_minimal() +
-  theme(plot.title.position = "plot",
-        plot.title = element_text(hjust = 0.5))
-
-```
-```{r ggplot top 10 routes with most delay incidence}
-#| message: false
-#| echo: false
-#| label: lines-most-delays
-#| tbl-cap: Most Common Reasons for Delay on TTC
+#| warning: false
+#| tbl-cap: Routes/Lines with Highest Delay Incidence
+#| fig-align: center
 
 #Routes with highest delay incidence
 delay_by_line <- cleaned_transit_data
@@ -347,18 +342,72 @@ ggplot(delay_by_line, aes(x = reorder(Line, desc(num_delays)), y = num_delays)) 
 
 ```
 
+We observe a mix of bus, streetcar, and subway routes accounting for the highest incidences of delay. Interestingly, subway Lines 1 (Yonge-University) and 2 (Bloor-Danforth) occupy the top two positions in terms of delay frequency, with 11628 and 9511 recorded incidents, respectively. Following closely are Streetcar Lines 501 (Queen St.) and 504 (King St.), ranking third and fourth. Rounding out the top five is Bus Route 32 (Eglinton West), which holds the fifth position in delay incidence, with 1920 recorded incidents. 
 
+```{r fig-highest-2}
+#| message: false
+#| echo: false
+#| warning: false
+#| tbl-cap: Routes/Lines with Highest Average Delay Time
+#| fig-align: center
+
+delay_by_line <- cleaned_transit_data
+
+delay_by_line <- delay_by_line |> 
+                 group_by(Line) |> 
+                 summarise(avg_delay = mean(`Min Delay`, na.rm = TRUE), .groups = "drop") |> 
+                 arrange(desc(avg_delay)) |> 
+                 head(10)
+
+# Plotting
+ggplot(delay_by_line, aes(x = reorder(Line, desc(avg_delay)), y = avg_delay)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Route/Line", y = "Average Delay (Minutes)", title = "Top 10 Routes with Longest Average Delay") +
+  theme_minimal() +
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
+
+```
+
+However, the picture changes entirely when routes are looked at in terms of average delay time in @fig-highest-2. Here, we see that bus routes entirely make up the 10 routes with the longest average wait times, ranging from 53.4 minutes for Route 162 (Lawrence-Donway) and  up to 133.0 minutes for Route 55 (Warren Park). These routes were checked for accuracy in the TTC's route finder [@routes]). 
 
 
 # Discussion {#sec-discussion}
 
-## Results {#subsec1-discussion}
+## Results and Implications {#subsec1-discussion}
 
-## Implications {#subsec2-discussion}
+The analysis of Toronto Transit Commission delays reveals several key findings and implications that could be useful in the public agency’s operations. The analysis found that buses experience the longest delay times among all modes of transport, suggesting a dire need to reduce bus waiting times across the board, but particularly on the routes analyzed in section 2.5. This could be accomplished in several ways, such as deploying more buses on these routes, or using tactics normally reserved for rail service like bus bridging, where buses are dispatched from scheduled services to act as temporary shuttles [@itanietal]. However, it is important to consider the relative passenger volume of these routes relative to the system as a whole. Perhaps there is such a high delay that the benefit of employing these tactics against the cost to other services provided by the TTC is simply not worth it to the agency.
+	
+Interestingly, delay incidents tend to occur more frequently on weekends, indicating a need for better trained and/or more response staff on call during those time to address these issues. Given the sensitive nature of some incidents, enhanced personnel training could potentially prevent certain situations. 
+	
+Subways, despite being a popular mode of transport, have the highest incidence of delay. This could point to underlying issues in subway service that warrant further investigation. As said in Section 2, more data is need to investigate this further, and a good first would be to record the reason for a particular delay when a delay is recorded in the dataset. 
+	
+The most common reasons for delay are mechanical issues, operations, and route diversions. This suggests that subway trains might need to be replaced, and staff could benefit from improved training to reduce delays and flexibility when dealing with route diversions and traffic.
+	
+In Toronto's warmer months, April-June particularly, streetcar delay times tend to spike significantly , possibly due to increased pedestrian and cyclist traffic in the downtown core, where streetcars are predominantly located. Although delays during that time are unavoidable, it could be worth exploring if training programmes and/or other strategies are being effectively deployed so that streetcars are running efficiently. 
 
-## New Areas of Exploration {#subsec3-discussion}
+## Further Areas of Exploration {#subsec2-discussion}
+
+Future analyses could be more comprehensive with better data on the reasons for subway delays. Additionally, given more time and resources to explore additional tools and R packages, location could be another factor of analysis within the scope of TTC delays. This would allow us to identify which neighbourhoods experience the most delays, thereby helping to prioritize maintenance crew dispatch and policy decision with respect to adding more vehicles and service to a particular area.
+
+Using data-driven methods to analyze the the TTC's performance of can enable the agency to make decisions that target key routes that need the most assistance, allowing public funds to be used in the most efficient way possible. This approach not only improves the efficiency of the TTC but will enhance the commuting experience for the public that depends on it every day to conduct their business in the ci
 
 # Appendix 
+Route nomenclature has gone through many changes throughout the history of the TTC. As James Bow, a TTC historian, said to BlogTO, "[The current system] is a kludge of several numbering schemes that were added to or replaced elements of the original scheme, with many elements grandfathered in". Hence, he says "there's very little rhyme or reason" to the transit numbering, making it confusing to almost everyone. [@flack]
+
+Luckily, in the same interview, conducted in late 2023, he provides a general overview of TTC nomenclature that can provide helpful context when understanding some of the graphs in this paper. The numbering is as follows: 
+
+- 1-4 - Subway and LRT routes
+- 5-139 - Regular bus routes, assigned willy-nilly
+- 140-159 - Premium express bus services
+- 160-189 - Regular bus routes, assigned willy-nilly
+- 300-399 - Night Bus and Streetcar services
+- 400-499 - Accessible Community Bus services
+- 500-599 - General Streetcar routes.
+- 900-999 - Express bus routes
+
+
+
 # References
 
 ---
