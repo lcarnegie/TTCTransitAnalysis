@@ -40,7 +40,6 @@ Patterns of public transit delay time are found across various genres of transpo
 
 
 # Data {#sec-data}
-
 ```{r data import}
 #| message: false
 #| echo: false
@@ -54,8 +53,11 @@ cleaned_transit_data <- read_csv(here::here("outputs/data/cleaned_dataset.csv"))
 cleaned_transit_data <- cleaned_transit_data |> mutate(Line = factor(Line))
 ```
 
+To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwaydata], and streetcar [@streetcardata] delay incidents for the year 2023 were downloaded using the OpenDataToronto R package [@odt] from the Toronto Open Data Catalogue. The data was then cleaned using R [@citeR], tidyverse [@tidyverse] and it's associated packages. After combining the datasets together, variables common between datasets and relevant to the analysis were selected, creating a dataset with 93,569 observations. For this analysis, the date (year, month, day), time, day of week, vehicle type, route/line, incident location, cause of delay, and time delay (in minutes) were considered. 
+
 ```{r sample table }
 #| message: false
+#| warning: false
 #| echo: false
 #| label: sample_table
 #| tbl-cap: Sample of Cleaned Delay Data
@@ -75,10 +77,9 @@ sample_table <- cleaned_transit_data |>
 #Scaling taken from: 
 #https://stackoverflow.com/questions/56254631/table-way-too-wide-to-fit-in-markdown-generated-pdf
 
-kable(sample_table) |> kable_styling(latex_options = c("striped", "scale_down"))
+kable(sample_table, format = "markdown") |> kable_styling(latex_options = c("scale_down"))
 ```
 
-To investigate transit delays in Toronto, data on bus [@busdata], subway [@subwaydata], and streetcar [@streetcardata] delay incidents for the year 2023 was downloaded using the OpenDataToronto R package [@odt] from the Toronto Open Data Catalogue. The data was then cleaned using R [@citeR], tidyverse [@tidyverse] and it's associated packages. After combining the datasets together, variables common between datasets and relevant to the analysis were selected, leading to a dataset with 93,569 observations. In the case of this analysis, the variables included were date (year, month, day), day of the week, Location of Delay Incident, Cause of Delay, the time delay (in minutes), Vehicle (bus, subway, streetcar), as well as the route/line (simplified to 'line') the vehicle was on when the incident happened.
 
 ## Incident Type {#subsec1-data}
 ```{r ggplot Common Delay Reasons}
@@ -136,12 +137,14 @@ ggplot(delay_by_line, aes(x = reorder(Line, desc(avg_delay)), y = avg_delay)) +
         plot.title = element_text(hjust = 0.5))
 
 ```
+
 ```{r ggplot top 10 routes with most delay incidence}
 #| message: false
 #| echo: false
 #| label: lines-most-delays
-#| tbl-cap: Incidence of Delay, by Route/Line 
+#| tbl-cap: Most Common Reasons for Delay on TTC
 
+#Routes with highest delay incidence
 delay_by_line <- cleaned_transit_data
 
 delay_by_line <- delay_by_line |> 
@@ -149,8 +152,7 @@ delay_by_line <- delay_by_line |>
                  summarise(num_delays = n(), .groups = "drop") |> 
                  arrange(desc(num_delays)) |> 
                  head(10)
-delay_by_line
-
+invisible(delay_by_line)
 
 # Plotting
 ggplot(delay_by_line, aes(x = reorder(Line, desc(num_delays)), y = num_delays)) +
@@ -159,6 +161,7 @@ ggplot(delay_by_line, aes(x = reorder(Line, desc(num_delays)), y = num_delays)) 
   theme_minimal() +
   theme(plot.title.position = "plot",
         plot.title = element_text(hjust = 0.5))
+
 
 
 ```
@@ -184,10 +187,12 @@ avg_time_delayed_vehicle |>
 #| message: false
 #| echo: false
 #| label: most-incidents-vehicle
-#| tbl-cap: Most Incidents by Vehicle
+
 #Bar graph of mode of transport with most incidence of delays 
 
-num_incidents_vehicle <- cleaned_transit_data |> group_by(vehicle) |> summarise(num_incidents = n(), .groups = "drop")
+most_delayed_vehicle <- cleaned_transit_data
+
+num_incidents_vehicle <- most_delayed_vehicle |> group_by(vehicle) |> summarise(num_incidents = n(), .groups = "drop")
 
 num_incidents_vehicle |>
   ggplot(mapping = aes(x = vehicle, y = num_incidents)) +
