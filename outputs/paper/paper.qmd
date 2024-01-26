@@ -5,12 +5,12 @@ author: Luca Carnegie
 thanks: "Code and data are available at: https://github.com/lcarnegie/TTCTransitAnalysis. Thank you to Nescafé coffee, Rajan Maghera, Hannah Yu, and Sehar Bajwa for your love and support - I could not have done it without you. Special thanks go to Rohan Alexander for the immense amount of R he taught me in such a short time and his extremely easy-to-navigate textbook (that has a cocktail appendix, fortunately)."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This paper analyzes TTC delay data to understand patterns and causes of delays. It finds buses experience the most delays, especially on certain routes, while subways have frequent undocumented delays. Mechanical issues, operations, and diversions are most common delay causes. The analysis indicates the need to reduce bus delays through more vehicles or tactics like bus bridging on certain routes."
 toc: true
 fig_caption: yes
 number-sections: true
 bibliography: references.bib
-
+title-block-style: none
 format: pdf
 ---
 
@@ -129,7 +129,6 @@ Next, the variation of delay incidents by day of the week was analyzed. @fig-dow
 #| warning: false
 #| fig-cap: Delays, aggregated by Day of Week
 #| fig-subcap: ["Incidences","Average Delay Time (mins)"]
-#| layout-ncol: 2
 #| fig-align: center
 #Day of week with most incidence of delay
 
@@ -375,17 +374,17 @@ The analysis of Toronto Transit Commission delays reveals several key findings a
 	
 Interestingly, delay incidents tend to occur more frequently on weekends, indicating a need for better trained and/or more response staff on call during those time to address these issues. Given the sensitive nature of some incidents, enhanced personnel training could potentially prevent certain situations. 
 	
-Subways, despite being a popular mode of transport, have the highest incidence of delay. This could point to underlying issues in subway service that warrant further investigation. As said in Section 2, more data is need to investigate this further, and a good first would be to record the reason for a particular delay when a delay is recorded in the dataset. 
+Subways, being a popular mode of transport, have the highest incidence of delay. This could point to underlying issues in subway service that warrant further investigation. As said in Section 2, more data is need to investigate this further, and a good first step to do this would be to record the reason for a particular delay when a delay is recorded in the dataset. 
 	
-The most common reasons for delay are mechanical issues, operations, and route diversions. This suggests that subway trains might need to be replaced, and staff could benefit from improved training to reduce delays and flexibility when dealing with route diversions and traffic.
+The most common reasons for delay are mechanical issues, operations, and route diversions. This suggests that subway trains might need to be replaced. Additionally, staff could benefit from improved training to reduce delays and flexibility when dealing with route diversions and traffic.
 	
-In Toronto's warmer months, April-June particularly, streetcar delay times tend to spike significantly , possibly due to increased pedestrian and cyclist traffic in the downtown core, where streetcars are predominantly located. Although delays during that time are unavoidable, it could be worth exploring if training programmes and/or other strategies are being effectively deployed so that streetcars are running efficiently. 
+In Toronto's warmer months, April-June particularly, streetcar delay times tend to spike significantly , possibly due to increased pedestrian and cyclist traffic in the downtown core, where streetcars are predominantly located. Although delays during that time are unavoidable, it could be worth exploring if training programmes and/or other strategies are being effectively deployed so that streetcars are running efficiently while respecting the safety of cyclist in the downtown core. 
 
 ## Further Areas of Exploration {#subsec2-discussion}
 
 Future analyses could be more comprehensive with better data on the reasons for subway delays. Additionally, given more time and resources to explore additional tools and R packages, location could be another factor of analysis within the scope of TTC delays. This would allow us to identify which neighbourhoods experience the most delays, thereby helping to prioritize maintenance crew dispatch and policy decision with respect to adding more vehicles and service to a particular area.
 
-Using data-driven methods to analyze the the TTC's performance of can enable the agency to make decisions that target key routes that need the most assistance, allowing public funds to be used in the most efficient way possible. This approach not only improves the efficiency of the TTC but will enhance the commuting experience for the public that depends on it every day to conduct their business in the ci
+Using data-driven methods to analyze the the TTC's performance can enable the agency to make decisions that target key routes that need the most assistance, allowing public funds to be used in the most efficient way possible. This approach not only improves the efficiency of the TTC but will enhance the  experience for the commuting public that depends on it every day to conduct their business in the city. 
 
 # Appendix 
 Route nomenclature has gone through many changes throughout the history of the TTC. As James Bow, a TTC historian, said to BlogTO, "[The current system] is a kludge of several numbering schemes that were added to or replaced elements of the original scheme, with many elements grandfathered in". Hence, he says "there's very little rhyme or reason" to the transit numbering, making it confusing to almost everyone. [@flack]
