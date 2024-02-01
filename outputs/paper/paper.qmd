@@ -305,7 +305,7 @@ When looking at changes in average delay times throughout  2023, there are sever
 
 ## Line/Route {#subsec5-data}
 
-Finally, the delays on particular subway lines and bus/streetcar routes were examined. Given the large number of different transit routes offered by the TTC, this analysis focuses on the 10 routes with the highest average delay times and highest incidence of delay. These findings are illustrated in @fig-highest-1 and @fig-highest-2. A short guide to the route number nomenclature of the TTC is provided in the Appendix for the reader's convenience. 
+Finally, the delays on particular subway lines and bus/streetcar routes were examined. Given the large number of different transit routes offered by the TTC, this analysis focuses on the 10 routes with the highest average delay times and highest incidence of delay. These findings are illustrated in @fig-highest-1 and @fig-highest-2. A short guide to the route number nomenclature of the TTC is provided in the Appendix (@sec-appendix) for the reader's convenience. 
 
 ```{r fig-highest-1}
 #| message: false
@@ -386,7 +386,19 @@ Future analyses could be more comprehensive with better data on the reasons for 
 
 Using data-driven methods to analyze the the TTC's performance can enable the agency to make decisions that target key routes that need the most assistance, allowing public funds to be used in the most efficient way possible. This approach not only improves the efficiency of the TTC but will enhance the  experience for the commuting public that depends on it every day to conduct their business in the city. 
 
-# Appendix 
+\newpage
+
+
+# References
+
+::: {#refs}
+:::
+
+\newpage
+
+
+# Appendix {#sec-appendix}
+
 Route nomenclature has gone through many changes throughout the history of the TTC. As James Bow, a TTC historian, said to BlogTO, "[The current system] is a kludge of several numbering schemes that were added to or replaced elements of the original scheme, with many elements grandfathered in". Hence, he says "there's very little rhyme or reason" to the transit numbering, making it confusing to almost everyone. [@flack]
 
 Luckily, in the same interview, conducted in late 2023, he provides a general overview of TTC nomenclature that can provide helpful context when understanding some of the graphs in this paper. The numbering is as follows: 
@@ -399,8 +411,4 @@ Luckily, in the same interview, conducted in late 2023, he provides a general ov
 - 400-499 - Accessible Community Bus services
 - 500-599 - General Streetcar routes.
 - 900-999 - Express bus routes
-
-
-
-# References
 
