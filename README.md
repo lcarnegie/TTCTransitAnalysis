@@ -1,4 +1,4 @@
-# Exploring the Pervasiveness of TTC delays: An comprehensive analysis
+# Exploring the Pervasiveness of TTC delays: A comprehensive analysis
 
 ## Overview of Paper
 
