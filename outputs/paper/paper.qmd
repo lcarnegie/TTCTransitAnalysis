@@ -278,6 +278,7 @@ In @fig-monthly-1 we see how the count of delays changes throughout 2023 for eac
 #| echo: false
 #| warning: false
 #| fig-cap: Average Delay Time, by Month
+
 #Line chart of how avg. delay time changes over the months
 
 # create tibble with month col
