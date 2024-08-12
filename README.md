@@ -2,7 +2,7 @@
 
 ## Overview of Paper
 
-This self-directed paper attempts to find patterns in public transit delays in Toronto across various genres of transportation (bus, subway, streetcar) and relating variables. 
+This self-directed paper attempts to find patterns in public transit delays in Toronto across various genres of transportation (bus, subway, streetcar) and relating variables. I was invited to present this work in a 30-minute talk about open-source, reproducible data science at a meeting of [Civic Tech Toronto](https://www.meetup.com/civic-tech-toronto/events/300633042/) in May 2024. 
 
 ## File Structure
 
